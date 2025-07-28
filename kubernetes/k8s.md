@@ -292,4 +292,174 @@ Kubernetes состоит из **Control Plane** (плоскость управ�
 - Минимизирует фрагментацию ресурсов
 
 
+# 14. Какова роль kubelet?
+
+## 🎯 **Что такое kubelet?**
+
+**kubelet** — это основной агент Node, который работает на каждой Node и отвечает за управление Pod'ами и контейнерами на этой Node. Это связующее звено между Control Plane и рабочими Node'ами.
+
+## 🏗️ **Основные функции kubelet:**
+
+### **1. Управление Pod'ами**
+- Получает Pod спецификации от API Server
+- Запускает и останавливает контейнеры
+- Мониторит состояние Pod'ов
+- Отправляет статус обратно в API Server
+
+### **2. Взаимодействие с Container Runtime**
+- Использует CRI (Container Runtime Interface)
+- Управляет жизненным циклом контейнеров
+- Обрабатывает образы контейнеров
+- Настраивает сеть и хранилище
+
+### **3. Health Checks**
+- Выполняет liveness probes
+- Выполняет readiness probes
+- Выполняет startup probes
+- Перезапускает неисправные контейнеры
+
+### **4. Ресурсы и мониторинг**
+- Собирает метрики использования ресурсов
+- Управляет cgroups
+- Контролирует лимиты ресурсов
+- Отправляет метрики в metrics-server
+
+
+# 15. Что делает kube-proxy?
+
+## 🎯 **Что такое kube-proxy?**
+
+**kube-proxy** — это сетевой компонент, который работает на каждой Node и отвечает за реализацию сетевых правил для Service'ов. Он обеспечивает сетевую связность и load balancing для Pod'ов.
+
+## 🏗️ **Основные функции kube-proxy:**
+
+### **1. Service Discovery**
+- Отслеживает Service'ы и Endpoints
+- Обновляет сетевые правила при изменениях
+- Обеспечивает доступность Service'ов
+
+### **2. Load Balancing**
+- Распределяет трафик между Pod'ами
+- Поддерживает различные алгоритмы балансировки
+- Обрабатывает session affinity
+
+### **3. Network Proxy**
+- Перенаправляет трафик к правильным Pod'ам
+- Реализует ClusterIP, NodePort, LoadBalancer
+- Обрабатывает внешний трафик
+
+
+```
+
+## 🎯 **Архитектура kube-proxy:**
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    kube-proxy                               │
+├─────────────────────────────────────────────────────────────┤
+│  Service Watcher                                            │
+│  ├── Watch Services from API Server                        │
+│  ├── Watch Endpoints from API Server                       │
+│  └── Detect changes in real-time                           │
+├─────────────────────────────────────────────────────────────┤
+│  Proxy Mode                                                 │
+│  ├── iptables mode (default)                               │
+│  │   ├── Create iptables rules                             │
+│  │   ├── DNAT for ClusterIP                               │
+│  │   └── Random load balancing                             │
+│  ├── IPVS mode                                             │
+│  │   ├── Create IPVS rules                                 │
+│  │   ├── Multiple LB algorithms                            │
+│  │   └── Better performance                                │
+│  └── userspace mode (deprecated)                           │
+├─────────────────────────────────────────────────────────────┤
+│  Network Programming                                        │
+│  ├── ClusterIP implementation                              │
+│  ├── NodePort implementation                               │
+│  ├── LoadBalancer integration                              │
+│  └── Session affinity handling                             │
+├─────────────────────────────────────────────────────────────┤
+│  Health Checking                                            │
+│  ├── Monitor backend Pod health                            │
+│  ├── Remove unhealthy endpoints                            │
+│  └── Update proxy rules                                    │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## 🔧 **Конфигурация kube-proxy:**
+
+### **1. ConfigMap:**
+```bash
+# Конфигурация kube-proxy
+kubectl get configmap kube-proxy -n kube-system -o yaml
+
+# Основные параметры:
+# - mode: iptables/ipvs/userspace
+# - clusterCIDR: диапазон IP Pod'ов
+# - bindAddress: адрес для привязки
+```
+
+### **2. Настройки производительности:**
+```bash
+# iptables mode настройки
+# - masqueradeAll: маскировать весь трафик
+# - syncPeriod: период синхронизации правил
+
+# IPVS mode настройки
+# - scheduler: алгоритм балансировки (rr, lc, sh)
+# - strictARP: строгий ARP режим
+```
+
+## 🎯 **Best Practices для kube-proxy:**
+
+### **1. Мониторинг:**
+- Следите за метриками kube-proxy
+- Мониторьте время синхронизации правил
+- Проверяйте доступность Service'ов
+
+### **2. Производительность:**
+- Используйте IPVS для больших кластеров
+- Оптимизируйте количество Service'ов
+- Мониторьте сетевую нагрузку
+
+### **3. Отладка:**
+- Проверяйте Endpoints при проблемах
+- Анализируйте логи kube-proxy
+- Тестируйте сетевую связность
+
+**kube-proxy — это сетевой мост, обеспечивающий доступность Service'ов в кластере!**
+
+
+# 16. Объясните компоненты Controller Manager
+
+## 🎯 **Что такое Controller Manager?**
+
+**kube-controller-manager** — это компонент Control Plane, который запускает различные контроллеры для поддержания желаемого состояния кластера. Каждый контроллер отвечает за определенный тип ресурсов.
+
+## 🏗️ **Основные контроллеры:**
+
+### **1. Deployment Controller**
+- Управляет ReplicaSets
+- Обеспечивает rolling updates
+- Поддерживает желаемое количество реплик
+
+### **2. ReplicaSet Controller**
+- Поддерживает количество Pod'ов
+- Создает/удаляет Pod'ы при необходимости
+- Мониторит состояние Pod'ов
+
+### **3. Node Controller**
+- Мониторит состояние Node'ов
+- Обрабатывает Node failures
+- Управляет Node lifecycle
+
+### **4. Service Controller**
+- Управляет Endpoints
+- Обновляет Service discovery
+- Интегрируется с cloud providers
+
+### **5. Namespace Controller**
+- Управляет жизненным циклом Namespace'ов
+- Очищает ресурсы при удалении Namespace
+
 
