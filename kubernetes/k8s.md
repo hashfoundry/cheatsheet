@@ -1175,3 +1175,34 @@ kubectl port-forward svc/prometheus-server -n monitoring 9090:80
 - Лучшая масштабируемость
 - Более эффективная сетевая производительность
 - Kubernetes 1.17+ (стабильная версия)
+
+# 🎯 **Best Practices:**
+
+### **1. Endpoints vs EndpointSlices:**
+- **Используйте EndpointSlices** для новых кластеров (Kubernetes 1.17+)
+- **Endpoints** для legacy совместимости
+- **EndpointSlices** лучше масштабируются для больших Services
+
+### **2. Мониторинг Endpoints:**
+```bash
+# Метрики в Prometheus:
+# kube_endpoint_info - информация об Endpoints
+# kube_endpointslice_info - информация об EndpointSlices
+# kube_service_info - связь Service с Endpoints
+
+# Проверить метрики
+kubectl port-forward svc/prometheus-server -n monitoring 9090:80
+
+# Полезные запросы:
+# kube_endpoint_address_available - доступные адреса
+# kube_endpoint_address_not_ready - неготовые адреса
+```
+
+
+### **4. Performance considerations:**
+- EndpointSlices разбивают большие списки на части (по умолчанию 100 endpoints на slice)
+- Уменьшают нагрузку на API server
+- Более эффективное обновление при изменениях
+- Лучшая производительность kube-proxy
+
+**Endpoints и EndpointSlices обеспечивают связь между Services и Pod'ами, с EndpointSlices как современной и масштабируемой альтернативой!**
