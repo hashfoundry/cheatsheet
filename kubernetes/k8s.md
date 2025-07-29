@@ -3802,3 +3802,67 @@ kubectl exec -it <pod> -- nslookup kubernetes.default.svc.cluster.local
 
 **Систематический подход к troubleshooting значительно ускоряет решение проблем в Kubernetes!**
 
+# 108. Лучшие практики для продакшена в Kubernetes
+
+## 🎯 **Лучшие практики для продакшена в Kubernetes**
+
+**Production-ready Kubernetes** требует соблюдения множества best practices для обеспечения надежности, безопасности и производительности.
+
+## 🏗️ **Основные категории:**
+
+### **1. Security:**
+- **RBAC** - минимальные привилегии
+- **Network Policies** - сетевая изоляция
+- **Pod Security Standards** - безопасность контейнеров
+- **Secrets Management** - управление секретами
+
+### **2. Resource Management:**
+- **Resource Limits** - ограничения ресурсов
+- **Quality of Service** - классы QoS
+- **Autoscaling** - автомасштабирование
+
+### **3. High Availability:**
+- **Multi-zone deployment** - развертывание в зонах
+- **Pod Disruption Budgets** - бюджеты прерывания
+- **Health Checks** - проверки работоспособности
+
+
+
+## 📋 **Production Checklist:**
+
+### **Security:**
+- ✅ RBAC настроен с минимальными привилегиями
+- ✅ Network Policies ограничивают трафик
+- ✅ Pod Security Context настроен
+- ✅ Secrets не хранятся в plain text
+
+### **Resource Management:**
+- ✅ Resource requests и limits установлены
+- ✅ ResourceQuota и LimitRange настроены
+- ✅ HPA настроен для автомасштабирования
+- ✅ PDB защищает от disruptions
+
+### **High Availability:**
+- ✅ Минимум 3 реплики для критичных сервисов
+- ✅ Anti-affinity правила для распределения
+- ✅ Health checks настроены
+- ✅ Multi-zone deployment
+
+## 🎯 **Практические команды:**
+
+```bash
+# Запустить production toolkit
+./kubernetes-production-toolkit.sh all
+
+# Проверить production readiness
+./kubernetes-production-toolkit.sh check
+
+# Применить production deployment
+kubectl apply -f production-app-template.yaml
+
+# Проверить security
+kubectl auth can-i --list --as=system:serviceaccount:default:hashfoundry-app-sa
+```
+
+**Соблюдение production best practices критически важно для стабильной работы в продакшене!**
+
