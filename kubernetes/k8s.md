@@ -3025,3 +3025,129 @@ kubectl apply -f webapp-rbac.yaml
 
 **Эффективное troubleshooting - ключ к поддержанию стабильности Kubernetes кластера!**
 
+# 91. Kubernetes Node Selection
+
+## 🎯 **Kubernetes Node Selection**
+
+**Node Selection** в Kubernetes - это процесс выбора подходящего узла для размещения Pod'а, выполняемый планировщиком (kube-scheduler) на основе различных критериев, включая ресурсы, ограничения, предпочтения и политики размещения.
+
+## 🏗️ **Компоненты Node Selection:**
+
+### **1. Scheduler Components:**
+- **kube-scheduler** - основной планировщик
+- **Scheduling Framework** - расширяемая архитектура
+- **Plugins** - модули планирования
+- **Profiles** - профили планирования
+
+### **2. Selection Criteria:**
+- **Resource requirements** - требования к ресурсам
+- **Node constraints** - ограничения узлов
+- **Affinity rules** - правила сродства
+- **Taints and tolerations** - метки и толерантности
+
+
+## 🔧 **Node Selection Strategies:**
+
+### **1. Resource-based Selection:**
+- **CPU/Memory requirements** - требования к ресурсам
+- **Storage requirements** - требования к хранилищу
+- **Network bandwidth** - пропускная способность сети
+- **GPU/Special hardware** - специальное оборудование
+
+### **2. Location-based Selection:**
+- **Zone/Region awareness** - осведомленность о зонах
+- **Rack diversity** - разнообразие стоек
+- **Network topology** - топология сети
+- **Latency requirements** - требования к задержке
+
+### **3. Workload-based Selection:**
+- **Application type** - тип приложения
+- **Performance tier** - уровень производительности
+- **Security requirements** - требования безопасности
+- **Compliance needs** - требования соответствия
+
+## 📊 **Monitoring Node Selection:**
+
+### **Ключевые метрики:**
+- **Scheduling latency** - задержка планирования
+- **Failed scheduling attempts** - неудачные попытки
+- **Node utilization** - использование узлов
+- **Pod distribution** - распределение подов
+
+### **Troubleshooting:**
+```bash
+# Проверить pending pods
+kubectl get pods --all-namespaces --field-selector=status.phase=Pending
+
+# Анализ событий планирования
+kubectl get events --field-selector reason=FailedScheduling
+
+# Проверить ресурсы узлов
+kubectl describe nodes | grep -A 5 "Allocated resources"
+```
+
+**Эффективный node selection обеспечивает оптимальное размещение workloads в кластере!**
+
+# 92. Node Affinity и Pod Affinity
+
+## 🎯 **Node Affinity и Pod Affinity**
+
+**Affinity** в Kubernetes - это расширенный механизм планирования, который позволяет определять предпочтения и требования для размещения Pod'ов на определенных узлах (Node Affinity) или относительно других Pod'ов (Pod Affinity), обеспечивая более гибкое и интеллектуальное планирование workloads.
+
+## 🏗️ **Типы Affinity:**
+
+### **1. Node Affinity:**
+- **requiredDuringSchedulingIgnoredDuringExecution** - жесткие требования
+- **preferredDuringSchedulingIgnoredDuringExecution** - мягкие предпочтения
+- **Node selectors** - селекторы узлов
+- **Label matching** - сопоставление меток
+
+### **2. Pod Affinity/Anti-Affinity:**
+- **podAffinity** - притяжение к другим Pod'ам
+- **podAntiAffinity** - отталкивание от других Pod'ов
+- **Topology domains** - топологические домены
+- **Label selectors** - селекторы меток
+
+
+## 🔧 **Best Practices для Affinity:**
+
+### **Node Affinity:**
+- **Use labels wisely** - используйте осмысленные метки
+- **Combine required and preferred** - комбинируйте жесткие и мягкие правила
+- **Consider node lifecycle** - учитывайте жизненный цикл узлов
+- **Plan for scaling** - планируйте масштабирование
+
+### **Pod Affinity:**
+- **Use topology keys** - используйте ключи топологии
+- **Balance performance and availability** - балансируйте производительность и доступность
+- **Consider resource constraints** - учитывайте ограничения ресурсов
+- **Monitor placement** - мониторьте размещение
+
+### **Anti-Affinity:**
+- **Ensure high availability** - обеспечивайте высокую доступность
+- **Use appropriate topology** - используйте подходящую топологию
+- **Consider failure domains** - учитывайте домены сбоев
+- **Plan for maintenance** - планируйте обслуживание
+
+## 📊 **Monitoring Affinity:**
+
+### **Ключевые метрики:**
+- **Pod placement distribution** - распределение размещения подов
+- **Affinity rule violations** - нарушения правил affinity
+- **Scheduling failures** - сбои планирования
+- **Node utilization balance** - баланс использования узлов
+
+### **Troubleshooting:**
+```bash
+# Проверить pending pods с affinity
+kubectl get pods --field-selector=status.phase=Pending -o json | jq '.items[] | select(.spec.affinity != null)'
+
+# Анализ событий планирования
+kubectl get events --field-selector reason=FailedScheduling | grep affinity
+
+# Проверить распределение по зонам
+kubectl get pods -o wide | awk '{print $7}' | sort | uniq -c
+```
+
+**Правильное использование Affinity обеспечивает оптимальное размещение и высокую доступность приложений!**
+
