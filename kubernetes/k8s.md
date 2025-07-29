@@ -3866,3 +3866,59 @@ kubectl auth can-i --list --as=system:serviceaccount:default:hashfoundry-app-sa
 
 **Соблюдение production best practices критически важно для стабильной работы в продакшене!**
 
+# 109. Экосистема и инструменты Kubernetes
+
+## 🎯 **Экосистема и инструменты Kubernetes**
+
+**Kubernetes ecosystem** включает множество инструментов и проектов, которые расширяют функциональность базовой платформы и упрощают управление кластерами.
+
+## 🛠️ **Основные категории инструментов:**
+
+### **1. Package Management:**
+- **Helm** - пакетный менеджер для Kubernetes
+- **Kustomize** - декларативное управление конфигурациями
+- **Operator Framework** - автоматизация операций
+
+### **2. CI/CD Tools:**
+- **ArgoCD** - GitOps continuous delivery
+- **Tekton** - cloud-native CI/CD
+- **Jenkins X** - CI/CD для Kubernetes
+
+### **3. Monitoring & Observability:**
+- **Prometheus** - мониторинг и алертинг
+- **Grafana** - визуализация метрик
+- **Jaeger** - distributed tracing
+
+
+## 🎯 **Популярные инструменты экосистемы:**
+
+### **Package Management:**
+```bash
+# Helm - пакетный менеджер
+helm repo add stable https://charts.helm.sh/stable
+helm search repo nginx
+helm install my-nginx stable/nginx-ingress
+
+# Kustomize - управление конфигурациями
+kubectl apply -k ./overlays/production
+```
+
+### **GitOps:**
+```bash
+# ArgoCD - continuous delivery
+kubectl get applications -n argocd
+argocd app sync my-app
+argocd app get my-app --show-params
+```
+
+### **Мониторинг:**
+```bash
+# Prometheus queries
+kubectl port-forward -n monitoring svc/prometheus 9090:9090
+
+# Grafana dashboards
+kubectl port-forward -n monitoring svc/grafana 3000:3000
+```
+
+**Богатая экосистема Kubernetes предоставляет инструменты для любых задач!**
+
