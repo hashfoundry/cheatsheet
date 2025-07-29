@@ -4098,3 +4098,66 @@ kubectl tree deployment <name>
 **Правильные инструменты делают debugging быстрым и эффективным!**
 
 
+# 115. Как устранять проблемы с DNS в Kubernetes
+
+## 🎯 **Как устранять проблемы с DNS в Kubernetes**
+
+**DNS проблемы** в Kubernetes могут серьезно нарушить работу приложений, так как большинство сервисов полагаются на DNS для обнаружения друг друга. Понимание DNS архитектуры и методов troubleshooting критически важно.
+
+## 🌐 **DNS архитектура в Kubernetes:**
+
+### **1. CoreDNS Components:**
+- **CoreDNS pods** - основной DNS сервер
+- **kube-dns service** - ClusterIP для DNS
+- **DNS policy** - политика DNS для pods
+- **Search domains** - домены поиска
+
+### **2. DNS Resolution Flow:**
+- **Pod → CoreDNS** - запрос DNS от pod
+- **CoreDNS → Upstream** - внешние DNS запросы
+- **Service Discovery** - разрешение имен сервисов
+- **FQDN Resolution** - полные доменные имена
+
+### **3. DNS Records Types:**
+- **A records** - IP адреса сервисов
+- **SRV records** - порты сервисов
+- **PTR records** - обратное разрешение
+- **CNAME records** - алиасы
+
+
+## 🔧 **Частые DNS проблемы и решения:**
+
+### **1. CoreDNS pods не запускаются:**
+```bash
+# Проверить ресурсы
+kubectl describe pods -n kube-system -l k8s-app=kube-dns
+
+# Перезапустить CoreDNS
+kubectl rollout restart deployment/coredns -n kube-system
+```
+
+### **2. Внешний DNS не работает:**
+```bash
+# Проверить upstream DNS в CoreDNS config
+kubectl get configmap coredns -n kube-system -o yaml
+
+# Проверить forward настройки
+```
+
+### **3. Service resolution не работает:**
+```bash
+# Проверить service и endpoints
+kubectl get service <service-name>
+kubectl get endpoints <service-name>
+
+# Проверить labels
+kubectl get pods --show-labels
+```
+
+### **4. Медленные DNS запросы:**
+```bash
+# Увеличить cache TTL в CoreDNS
+# Добавить больше ресурсов CoreDNS
+# Проверить network latency
+```
+
