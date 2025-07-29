@@ -4497,3 +4497,43 @@ kubeadm certs renew all
 - **Azure CNI** - Azure virtual networks
 - **GCP CNI** - Google Cloud networking
 
+## 🎯 **Feature Matrix**
+
+| Feature | Calico | Flannel | Cilium | Weave | AWS VPC |
+|---------|--------|---------|--------|-------|---------|
+| **Network Policies** | ✅ L3-L4 | ❌ | ✅ L3-L7 | ✅ L3-L4 | ✅ L3-L4 |
+| **Encryption** | ✅ WireGuard | ❌ | ✅ IPSec | ✅ Built-in | ✅ TLS |
+| **IPv6 Support** | ✅ | ✅ | ✅ | ✅ | ❌ |
+| **Multi-cloud** | ✅ | ✅ | ✅ | ✅ | ❌ |
+| **Service Mesh** | ❌ | ❌ | ✅ | ❌ | ❌ |
+| **Observability** | ⭐⭐⭐ | ⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐ | ⭐⭐⭐ |
+| **Load Balancing** | ✅ IPVS | ❌ | ✅ eBPF | ✅ | ✅ AWS ALB |
+| **Windows Support** | ✅ | ✅ | ❌ | ✅ | ✅ |
+
+**Характеристики:**
+- ✅ eBPF производительность
+- ✅ L7 network policies
+- ✅ Service mesh возможности
+- ✅ Observability
+- ❌ Высокое потребление ресурсов
+
+## 🔧 **Сравнение производительности:**
+
+### **Throughput (Gbps):**
+- **Calico**: 9.5+ (native routing)
+- **Cilium**: 9.0+ (eBPF optimized)
+- **Flannel**: 7.0+ (VXLAN overhead)
+- **Weave**: 6.5+ (encryption overhead)
+
+### **Latency (μs):**
+- **Calico**: <100 (no encapsulation)
+- **Cilium**: <150 (eBPF processing)
+- **Flannel**: <200 (VXLAN processing)
+- **Weave**: <250 (encryption processing)
+
+### **CPU Usage:**
+- **Flannel**: Низкое
+- **Calico**: Среднее
+- **Cilium**: Высокое (eBPF compilation)
+- **Weave**: Среднее
+
