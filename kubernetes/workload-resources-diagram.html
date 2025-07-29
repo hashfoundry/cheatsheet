@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Иерархия Workload Resources в Kubernetes</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .diagram-container {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow-x: auto;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 3px;
+        }
+        .relationships {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+        .relationships h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .relationships ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        .relationships li {
+            margin-bottom: 8px;
+            padding: 5px;
+            background-color: white;
+            border-radius: 4px;
+            border-left: 4px solid #326CE5;
+        }
+    </style>
+</head>
+<body>
+    <div class="diagram-container">
+        <h1>Иерархия Workload Resources в Kubernetes</h1>
+        
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #EC4899;"></div>
+                <span>Pod</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #8B5CF6;"></div>
+                <span>ReplicaSet</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #F59E0B;"></div>
+                <span>Deployment</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #10B981;"></div>
+                <span>StatefulSet</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #3B82F6;"></div>
+                <span>DaemonSet</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #F97316;"></div>
+                <span>Job</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #84CC16;"></div>
+                <span>CronJob</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #6366F1;"></div>
+                <span>Controllers</span>
+            </div>
+        </div>
+
+        <svg width="1400" height="900" viewBox="0 0 1400 900">
+            <defs>
+                <style>
+                    .pod { fill: #EC4899; stroke: #DB2777; stroke-width: 2; }
+                    .replicaset { fill: #8B5CF6; stroke: #7C3AED; stroke-width: 2; }
+                    .deployment { fill: #F59E0B; stroke: #D97706; stroke-width: 2; }
+                    .statefulset { fill: #10B981; stroke: #059669; stroke-width: 2; }
+                    .daemonset { fill: #3B82F6; stroke: #2563EB; stroke-width: 2; }
+                    .job { fill: #F97316; stroke: #EA580C; stroke-width: 2; }
+                    .cronjob { fill: #84CC16; stroke: #65A30D; stroke-width: 2; }
+                    .controller { fill: #6366F1; stroke: #4F46E5; stroke-width: 2; }
+                    .service { fill: #14B8A6; stroke: #0F766E; stroke-width: 2; }
+                    .storage { fill: #A855F7; stroke: #9333EA; stroke-width: 2; }
+                    
+                    .title { font: bold 14px Arial; fill: white; text-anchor: middle; dominant-baseline: central; }
+                    .subtitle { font: bold 11px Arial; fill: white; text-anchor: middle; dominant-baseline: central; }
+                    .label { font: 9px Arial; fill: white; text-anchor: middle; dominant-baseline: central; }
+                    .small-label { font: 7px Arial; fill: white; text-anchor: middle; dominant-baseline: central; }
+                    
+                    .creates { stroke: #059669; stroke-width: 3; fill: none; marker-end: url(#arrowhead-green); }
+                    .manages { stroke: #DC2626; stroke-width: 2; fill: none; marker-end: url(#arrowhead-red); stroke-dasharray: 5,5; }
+                    .selects { stroke: #7C3AED; stroke-width: 2; fill: none; marker-end: url(#arrowhead-purple); }
+                    .scales { stroke: #F59E0B; stroke-width: 2; fill: none; marker-end: url(#arrowhead-orange); stroke-dasharray: 3,3; }
+                </style>
+                
+                <marker id="arrowhead-green" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+                    <polygon points="0 0, 10 3.5, 0 7" fill="#059669"/>
+                </marker>
+                <marker id="arrowhead-red" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+                    <polygon points="0 0, 10 3.5, 0 7" fill="#DC2626"/>
+                </marker>
+                <marker id="arrowhead-purple" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+                    <polygon points="0 0, 10 3.5, 0 7" fill="#7C3AED"/>
+                </marker>
+                <marker id="arrowhead-orange" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+                    <polygon points="0 0, 10 3.5, 0 7" fill="#F59E0B"/>
+                </marker>
+            </defs>
+            
+            <!-- Background -->
+            <rect width="1400" height="900" fill="#F9FAFB"/>
+            
+            <!-- Title -->
+            <text x="700" y="30" style="font: bold 18px Arial; fill: #1F2937; text-anchor: middle;">Workload Resources Ecosystem</text>
+            
+            <!-- CronJob -->
+            <rect x="50" y="70" width="200" height="120" class="cronjob" rx="8"/>
+            <text x="150" y="95" class="subtitle">CronJob</text>
+            <rect x="70" y="115" width="160" height="20" class="cronjob" rx="3"/>
+            <text x="150" y="125" class="label">Schedule: "0 2 * * *"</text>
+            <rect x="70" y="145" width="160" height="20" class="cronjob" rx="3"/>
+            <text x="150" y="155" class="label">Concurrency Policy</text>
+            <rect x="70" y="170" width="160" height="15" class="cronjob" rx="3"/>
+            <text x="150" y="177" class="small-label">Job Template</text>
+            
+            <!-- Job -->
+            <rect x="320" y="70" width="200" height="120" class="job" rx="8"/>
+            <text x="420" y="95" class="subtitle">Job</text>
+            <rect x="340" y="115" width="70" height="20" class="job" rx="3"/>
+            <text x="375" y="125" class="label">Completions</text>
+            <rect x="430" y="115" width="70" height="20" class="job" rx="3"/>
+            <text x="465" y="125" class="label">Parallelism</text>
+            <rect x="340" y="145" width="160" height="20" class="job" rx="3"/>
+            <text x="420" y="155" class="label">Backoff Limit</text>
+            <rect x="340" y="170" width="160" height="15" class="job" rx="3"/>
+            <text x="420" y="177" class="small-label">Pod Template</text>
+            
+            <!-- Deployment -->
+            <rect x="50" y="230" width="200" height="160" class="deployment" rx="8"/>
+            <text x="150" y="255" class="subtitle">Deployment</text>
+            <rect x="70" y="275" width="160" height="20" class="deployment" rx="3"/>
+            <text x="150" y="285" class="label">Rolling Update Strategy</text>
+            <rect x="70" y="305" width="75" height="15" class="deployment" rx="2"/>
+            <text x="107" y="312" class="small-label">maxSurge: 25%</text>
+            <rect x="155" y="305" width="75" height="15" class="deployment" rx="2"/>
+            <text x="192" y="312" class="small-label">maxUnavailable</text>
+            <rect x="70" y="330" width="160" height="20" class="deployment" rx="3"/>
+            <text x="150" y="340" class="label">Revision History</text>
+            <rect x="70" y="360" width="160" height="20" class="deployment" rx="3"/>
+            <text x="150" y="370" class="label">Pod Template Spec</text>
+            
+            <!-- ReplicaSet -->
+            <rect x="320" y="230" width="200" height="130" class="replicaset" rx="8"/>
+            <text x="420" y="255" class="subtitle">ReplicaSet</text>
+            <rect x="340" y="275" width="70" height="20" class="replicaset" rx="3"/>
+            <text x="375" y="285" class="label">Replicas: 3</text>
+            <rect x="430" y="275" width="70" height="20" class="replicaset" rx="3"/>
+            <text x="465" y="285" class="label">Selector</text>
+            <rect x="340" y="305" width="160" height="20" class="replicaset" rx="3"/>
+            <text x="420" y="315" class="label">Pod Template</text>
+            <rect x="340" y="335" width="160" height="20" class="replicaset" rx="3"/>
+            <text x="420" y="345" class="label">Managed Pods</text>
+            
+            <!-- StatefulSet -->
+            <rect x="590" y="70" width="200" height="200" class="statefulset" rx="8"/>
+            <text x="690" y="95" class="subtitle">StatefulSet</text>
+            <rect x="610" y="115" width="160" height="20" class="statefulset" rx="3"/>
+            <text x="690" y="125" class="label">Ordered Pods (app-0, app-1)</text>
+            <rect x="610" y="145" width="160" height="20" class="statefulset" rx="3"/>
+            <text x="690" y="155" class="label">VolumeClaimTemplates</text>
+            <rect x="610" y="175" width="160" height="20" class="statefulset" rx="3"/>
+            <text x="690" y="185" class="label">Stable Network Identity</text>
+            <rect x="610" y="205" width="75" height="20" class="statefulset" rx="3"/>
+            <text x="647" y="215" class="label">Rolling Update</text>
+            <rect x="695" y="205" width="75" height="20" class="statefulset" rx="3"/>
+            <text x="732" y="215" class="label">OnDelete</text>
+            <rect x="610" y="235" width="160" height="20" class="statefulset" rx="3"/>
+            <text x="690" y="245" class="label">Headless Service Required</text>
+            
+            <!-- DaemonSet -->
+            <rect x="860" y="70" width="200" height="160" class="daemonset" rx="8"/>
+            <text x="960" y="95" class="subtitle">DaemonSet</text>
+            <rect x="880" y="115" width="160" height="20" class="daemonset" rx="3"/>
+            <text x="960" y="125" class="label">One Pod per Node</text>
+            <rect x="880" y="145" width="160" height="20" class="daemonset" rx="3"/>
+            <text x="960" y="155" class="label">Node Selector/Affinity</text>
+            <rect x="880" y="175" width="160" height="20" class="daemonset" rx="3"/>
+            <text x="960" y="185" class="label">Taints & Tolerations</text>
+            <rect x="880" y="205" width="160" height="20" class="daemonset" rx="3"/>
+            <text x="960" y="215" class="label">Rolling Update Strategy</text>
+            
+            <!-- Pods Section -->
+            <rect x="200" y="420" width="800" height="180" style="fill: #FDF2F8; stroke: #EC4899; stroke-width: 2; stroke-dasharray: 5,5;" rx="10"/>
+            <text x="600" y="445" style="font: bold 14px Arial; fill: #EC4899; text-anchor: middle;">Pod Ecosystem</text>
+            
+            <!-- Pod 1 -->
+            <rect x="230" y="470" width="140" height="120" class="pod" rx="6"/>
+            <text x="300" y="490" class="subtitle">Pod</text>
+            <rect x="245" y="505" width="110" height="15" class="pod" rx="2"/>
+            <text x="300" y="512" class="small-label">App Container</text>
+            <rect x="245" y="525" width="110" height="15" class="pod" rx="2"/>
+            <text x="300" y="532" class="small-label">Init Container</text>
+            <rect x="245" y="545" width="50" height="15" class="pod" rx="2"/>
+            <text x="270" y="552" class="small-label">Volumes</text>
+            <rect x="305" y="545" width="50" height="15" class="pod" rx="2"/>
+            <text x="330" y="552" class="small-label">Network</text>
+            <rect x="245" y="565" width="110" height="15" class="pod" rx="2"/>
+            <text x="300" y="572" class="small-label">Resource Limits</text>
+            
+            <!-- Pod 2 -->
+            <rect x="400" y="470" width="140" height="120" class="pod" rx="6"/>
+            <text x="470" y="490" class="subtitle">Pod</text>
+            <rect x="415" y="505" width="110" height="15" class="pod" rx="2"/>
+            <text x="470" y="512" class="small-label">App Container</text>
+            <rect x="415" y="525" width="110" height="15" class="pod" rx="2"/>
+            <text x="470" y="532" class="small-label">Sidecar Container</text>
+            <rect x="415" y="545" width="50" height="15" class="pod" rx="2"/>
+            <text x="440" y="552" class="small-label">PVC</text>
+            <rect x="475" y="545" width="50" height="15" class="pod" rx="2"/>
+            <text x="500" y="552" class="small-label">ConfigMap</text>
+            <rect x="415" y="565" width="110" height="15" class="pod" rx="2"/>
+            <text x="470" y="572" class="small-label">Security Context</text>
+            
+            <!-- Pod 3 -->
+            <rect x="570" y="470" width="140" height="120" class="pod" rx="6"/>
+            <text x="640" y="490" class="subtitle">Pod (StatefulSet)</text>
+            <rect x="585" y="505" width="110" height="15" class="pod" rx="2"/>
+            <text x="640" y="512" class="small-label">Stable Identity: app-0</text>
+            <rect x="585" y="525" width="110" height="15" class="pod" rx="2"/>
+            <text x="640" y="532" class="small-label">Persistent Volume</text>
+            <rect x="585" y="545" width="110" height="15" class="pod" rx="2"/>
+            <text x="640" y="552" class="small-label">DNS: app-0.svc</text>
+            <rect x="585" y="565" width="110" height="15" class="pod" rx="2"/>
+            <text x="640" y="572" class="small-label">Ordered Creation</text>
+            
+            <!-- Pod 4 -->
+            <rect x="740" y="470" width="140" height="120" class="pod" rx="6"/>
+            <text x="810" y="490" class="subtitle">Pod (DaemonSet)</text>
+            <rect x="755" y="505" width="110" height="15" class="pod" rx="2"/>
+            <text x="810" y="512" class="small-label">Node Agent</text>
+            <rect x="755" y="525" width="110" height="15" class="pod" rx="2"/>
+            <text x="810" y="532" class="small-label">Host Network</text>
+            <rect x="755" y="545" width="110" height="15" class="pod" rx="2"/>
+            <text x="810" y="552" class="small-label">Host Volumes</text>
+            <rect x="755" y="565" width="110" height="15" class="pod" rx="2"/>
+            <text x="810" y="572" class="small-label">Tolerations</text>
+            
+            <!-- Controllers -->
+            <rect x="1130" y="70" width="200" height="300" class="controller" rx="8"/>
+            <text x="1230" y="95" class="subtitle">Controllers</text>
+            
+            <rect x="1150" y="120" width="160" height="25" class="controller" rx="3"/>
+            <text x="1230" y="132" class="label">Deployment Controller</text>
+            
+            <rect x="1150" y="155" width="160" height="25" class="controller" rx="3"/>
+            <text x="1230" y="167" class="label">ReplicaSet Controller</text>
+            
+            <rect x="1150" y="190" width="160" height="25" class="controller" rx="3"/>
+            <text x="1230" y="202" class="label">StatefulSet Controller</text>
+            
+            <rect x="1150" y="225" width="160" height="25" class="controller" rx="3"/>
+            <text x="1230" y="237" class="label">DaemonSet Controller</text>
+            
+            <rect x="1150" y="260" width="160" height="25" class="controller" rx="3"/>
+            <text x="1230" y="272" class="label">Job Controller</text>
+            
+            <rect x="1150" y="295" width="160" height="25" class="controller" rx="3"/>
+            <text x="1230" y="307" class="label">CronJob Controller</text>
+            
+            <rect x="1150" y="330" width="160" height="25" class="controller" rx="3"/>
+            <text x="1230" y="342" class="label">Custom Controllers</text>
+            
+            <!-- Services -->
+            <rect x="50" y="650" width="300" height="100" class="service" rx="8"/>
+            <text x="200" y="675" class="subtitle">Services & Networking</text>
+            
+            <rect x="70" y="695" width="80" height="20" class="service" rx="3"/>
+            <text x="110" y="705" class="label">ClusterIP</text>
+            
+            <rect x="160" y="695" width="80" height="20" class="service" rx="3"/>
+            <text x="200" y="705" class="label">NodePort</text>
+            
+            <rect x="250" y="695" width="80" height="20" class="service" rx="3"/>
+            <text x="290" y="705" class="label">LoadBalancer</text>
+            
+            <rect x="70" y="725" width="260" height="20" class="service" rx="3"/>
+            <text x="200" y="735" class="label">Headless Service (StatefulSet)</text>
+            
+            <!-- Storage -->
+            <rect x="380" y="650" width="300" height="100" class="storage" rx="8"/>
+            <text x="530" y="675" class="subtitle">Storage Resources</text>
+            
+            <rect x="400" y="695" width="120" height="20" class="storage" rx="3"/>
+            <text x="460" y="705" class="label">PersistentVolume</text>
+            
+            <rect x="540" y="695" width="120" height="20" class="storage" rx="3"/>
+            <text x="600" y="705" class="label">VolumeClaimTemplate</text>
+            
+            <rect x="400" y="725" width="80" height="20" class="storage" rx="3"/>
+            <text x="440" y="735" class="label">ConfigMap</text>
+            
+            <rect x="500" y="725" width="80" height="20" class="storage" rx="3"/>
+            <text x="540" y="735" class="label">Secret</text>
+            
+            <rect x="600" y="725" width="60" height="20" class="storage" rx="3"/>
+            <text x="630" y="735" class="label">EmptyDir</text>
+            
+            <!-- Autoscaling -->
+            <rect x="710" y="650" width="200" height="100" style="fill: #06B6D4; stroke: #0891B2; stroke-width: 2;" rx="8"/>
+            <text x="810" y="675" class="subtitle">Autoscaling</text>
+            
+            <rect x="730" y="695" width="80" height="20" style="fill: #06B6D4; stroke: #0891B2; stroke-width: 2;" rx="3"/>
+            <text x="770" y="705" class="label">HPA</text>
+            
+            <rect x="820" y="695" width="80" height="20" style="fill: #06B6D4; stroke: #0891B2; stroke-width: 2;" rx="3"/>
+            <text x="860" y="705" class="label">VPA</text>
+            
+            <rect x="730" y="725" width="170" height="20" style="fill: #06B6D4; stroke: #0891B2; stroke-width: 2;" rx="3"/>
+            <text x="815" y="735" class="label">Cluster Autoscaler</text>
+            
+            <!-- Connection Lines -->
+            
+            <!-- CronJob -> Job -->
+            <line x1="250" y1="130" x2="320" y2="130" class="creates"/>
+            
+            <!-- Job -> Pod -->
+            <line x1="420" y1="190" x2="470" y2="420" class="creates"/>
+            
+            <!-- Deployment -> ReplicaSet -->
+            <line x1="250" y1="310" x2="320" y2="295" class="creates"/>
+            
+            <!-- ReplicaSet -> Pod -->
+            <line x1="420" y1="360" x2="300" y2="420" class="creates"/>
+            
+            <!-- StatefulSet -> Pod -->
+            <line x1="690" y1="270" x2="640" y2="420" class="creates"/>
+            
+            <!-- DaemonSet -> Pod -->
+            <line x1="960" y1="230" x2="810" y2="420" class="creates"/>
+            
+            <!-- Controllers manage workloads -->
+            <line x1="1130" y1="132" x2="250" y2="310" class="manages"/>
+            <line x1="1130" y1="167" x2="520" y2="295" class="manages"/>
+            <line x1="1130" y1="202" x2="790" y2="155" class="manages"/>
+            <line x1="1130" y1="237" x2="1060" y2="155" class="manages"/>
+            <line x1="1130" y1="272" x2="520" y2="130" class="manages"/>
+            <line x1="1130" y1="307" x2="250" y2="130" class="manages"/>
+            
+            <!-- Services select Pods -->
+            <line x1="200" y1="650" x2="470" y2="590" class="selects"/>
+            <line x1="530" y1="650" x2="640" y2="590" class="selects"/>
+            
+            <!-- HPA scales workloads -->
+            <line x1="770" y1="650" x2="150" y2="390" class="scales"/>
+            <line x1="810" y1="650" x2="690" y2="270" class="scales"/>
+            
+            <!-- Labels and arrows for connections -->
+            <text x="285" y="125" style="font: 8px Arial; fill: #059669;">creates</text>
+            <text x="360" y="310" style="font: 8px Arial; fill: #059669;">creates</text>
+            <text x="360" y="390" style="font: 8px Arial; fill: #059669;">creates</text>
+            <text x="665" y="350" style="font: 8px Arial; fill: #059669;">creates</text>
+            <text x="885" y="330" style="font: 8px Arial; fill: #059669;">creates</text>
+            
+            <text x="690" y="250" style="font: 8px Arial; fill: #DC2626;">manages</text>
+            <text x="350" y="620" style="font: 8px Arial; fill: #7C3AED;">selects</text>
+            <text x="480" y="620" style="font: 8px Arial; fill: #F59E0B;">scales</text>
+        </svg>
+        
+        <div class="relationships">
+            <h3>🔗 Основные связи в Workload Resources</h3>
+            <ul>
+                <li><strong>CronJob ──creates──> Job ──creates──> Pod</strong> - Запланированные задачи создают джобы, которые создают поды</li>
+                <li><strong>Deployment ──creates──> ReplicaSet ──creates──> Pod</strong> - Деплойменты управляют репликасетами, которые создают поды</li>
+                <li><strong>StatefulSet ──creates──> Pod (ordered)</strong> - StatefulSet создает поды с упорядоченной идентичностью</li>
+                <li><strong>DaemonSet ──creates──> Pod (one per node)</strong> - DaemonSet создает по одному поду на каждом узле</li>
+                <li><strong>Controllers ──manage──> Workload Resources</strong> - Контроллеры следят за состоянием ресурсов</li>
+                <li><strong>Services ──select──> Pods (via labels)</strong> - Сервисы выбирают поды по меткам</li>
+                <li><strong>HPA ──scales──> Deployments/StatefulSets</strong> - Автомасштабирование изменяет количество реплик</li>
+                <li><strong>VolumeClaimTemplates ──create──> PVC per Pod</strong> - Шаблоны создают PVC для каждого пода в StatefulSet</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
