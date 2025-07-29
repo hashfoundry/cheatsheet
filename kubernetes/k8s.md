@@ -3763,3 +3763,42 @@ kubectl describe application my-app
 - **PVC Pending** - PersistentVolumeClaim в ожидании
 - **Mount failures** - ошибки монтирования томов
 
+
+## 🎯 **Практические команды для troubleshooting:**
+
+### **Диагностика Pod проблем:**
+```bash
+# Запустить полную диагностику
+./kubernetes-troubleshooting-toolkit.sh all
+
+# Диагностика конкретного Pod
+./kubernetes-troubleshooting-toolkit.sh pod default my-pod
+
+# Анализ проблем с Pod
+./diagnose-pod-issues.sh all
+```
+
+### **Быстрая диагностика:**
+```bash
+# Проверить проблемные Pod
+kubectl get pods --all-namespaces --field-selector=status.phase!=Running
+
+# Посмотреть события
+kubectl get events --sort-by='.lastTimestamp' | tail -20
+
+# Проверить ресурсы узлов
+kubectl top nodes
+kubectl describe nodes | grep -A 5 "Allocated resources"
+```
+
+### **Сетевая диагностика:**
+```bash
+# Тестировать сетевое подключение
+./test-network-connectivity.sh all
+
+# Проверить DNS
+kubectl exec -it <pod> -- nslookup kubernetes.default.svc.cluster.local
+```
+
+**Систематический подход к troubleshooting значительно ускоряет решение проблем в Kubernetes!**
+
