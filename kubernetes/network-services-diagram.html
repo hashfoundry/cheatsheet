@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Иерархия Network Services в Kubernetes</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .diagram-container {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow-x: auto;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 3px;
+        }
+        .relationships {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+        .relationships h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .relationships ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        .relationships li {
+            margin-bottom: 8px;
+            padding: 5px;
+            background-color: white;
+            border-radius: 4px;
+            border-left: 4px solid #326CE5;
+        }
+    </style>
+</head>
+<body>
+    <div class="diagram-container">
+        <h1>Иерархия Network Services в Kubernetes</h1>
+        
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #3B82F6;"></div>
+                <span>Services</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #10B981;"></div>
+                <span>Endpoints</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #F59E0B;"></div>
+                <span>Ingress</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #EF4444;"></div>
+                <span>Network Policies</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #8B5CF6;"></div>
+                <span>DNS</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #06B6D4;"></div>
+                <span>CNI</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #84CC16;"></div>
+                <span>kube-proxy</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #EC4899;"></div>
+                <span>Service Mesh</span>
+            </div>
+        </div>
+
+        <svg width="1500" height="900" viewBox="0 0 1500 900">
+            <defs>
+                <style>
+                    .service { fill: #3B82F6; stroke: #2563EB; stroke-width: 2; }
+                    .endpoint { fill: #10B981; stroke: #059669; stroke-width: 2; }
+                    .ingress { fill: #F59E0B; stroke: #D97706; stroke-width: 2; }
+                    .policy { fill: #EF4444; stroke: #DC2626; stroke-width: 2; }
+                    .dns { fill: #8B5CF6; stroke: #7C3AED; stroke-width: 2; }
+                    .cni { fill: #06B6D4; stroke: #0891B2; stroke-width: 2; }
+                    .proxy { fill: #84CC16; stroke: #65A30D; stroke-width: 2; }
+                    .mesh { fill: #EC4899; stroke: #DB2777; stroke-width: 2; }
+                    .pod { fill: #F97316; stroke: #EA580C; stroke-width: 2; }
+                    
+                    .title { font: bold 14px Arial; fill: white; text-anchor: middle; dominant-baseline: central; }
+                    .subtitle { font: bold 11px Arial; fill: white; text-anchor: middle; dominant-baseline: central; }
+                    .label { font: 9px Arial; fill: white; text-anchor: middle; dominant-baseline: central; }
+                    .small-label { font: 7px Arial; fill: white; text-anchor: middle; dominant-baseline: central; }
+                    
+                    .routes { stroke: #059669; stroke-width: 3; fill: none; marker-end: url(#arrowhead-green); }
+                    .selects { stroke: #3B82F6; stroke-width: 3; fill: none; marker-end: url(#arrowhead-blue); }
+                    .resolves { stroke: #8B5CF6; stroke-width: 2; fill: none; marker-end: url(#arrowhead-purple); }
+                    .manages { stroke: #10B981; stroke-width: 2; fill: none; marker-end: url(#arrowhead-teal); stroke-dasharray: 5,5; }
+                    .enforces { stroke: #EF4444; stroke-width: 2; fill: none; marker-end: url(#arrowhead-red); stroke-dasharray: 3,3; }
+                    .proxies { stroke: #84CC16; stroke-width: 2; fill: none; marker-end: url(#arrowhead-lime); }
+                </style>
+                
+                <marker id="arrowhead-green" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+                    <polygon points="0 0, 10 3.5, 0 7" fill="#059669"/>
+                </marker>
+                <marker id="arrowhead-blue" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+                    <polygon points="0 0, 10 3.5, 0 7" fill="#3B82F6"/>
+                </marker>
+                <marker id="arrowhead-purple" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+                    <polygon points="0 0, 10 3.5, 0 7" fill="#8B5CF6"/>
+                </marker>
+                <marker id="arrowhead-teal" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+                    <polygon points="0 0, 10 3.5, 0 7" fill="#10B981"/>
+                </marker>
+                <marker id="arrowhead-red" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+                    <polygon points="0 0, 10 3.5, 0 7" fill="#EF4444"/>
+                </marker>
+                <marker id="arrowhead-lime" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+                    <polygon points="0 0, 10 3.5, 0 7" fill="#84CC16"/>
+                </marker>
+            </defs>
+            
+            <!-- Background -->
+            <rect width="1500" height="900" fill="#F9FAFB"/>
+            
+            <!-- Title -->
+            <text x="750" y="30" style="font: bold 18px Arial; fill: #1F2937; text-anchor: middle;">Network Services Ecosystem</text>
+            
+            <!-- External Traffic -->
+            <rect x="50" y="70" width="150" height="80" style="fill: #FEF3C7; stroke: #F59E0B; stroke-width: 2;" rx="8"/>
+            <text x="125" y="95" style="font: bold 12px Arial; fill: #92400E; text-anchor: middle;">External Traffic</text>
+            <rect x="70" y="115" width="110" height="15" style="fill: #FCD34D; stroke: #F59E0B; stroke-width: 1;" rx="3"/>
+            <text x="125" y="122" style="font: 8px Arial; fill: #92400E; text-anchor: middle;">Internet / LoadBalancer</text>
+            <rect x="70" y="135" width="110" height="10" style="fill: #FCD34D; stroke: #F59E0B; stroke-width: 1;" rx="2"/>
+            <text x="125" y="140" style="font: 7px Arial; fill: #92400E; text-anchor: middle;">Cloud Provider</text>
+            
+            <!-- Ingress -->
+            <rect x="250" y="70" width="200" height="120" class="ingress" rx="8"/>
+            <text x="350" y="95" class="subtitle">Ingress Layer</text>
+            
+            <rect x="270" y="115" width="80" height="20" class="ingress" rx="3"/>
+            <text x="310" y="125" class="label">Ingress</text>
+            
+            <rect x="360" y="115" width="80" height="20" class="ingress" rx="3"/>
+            <text x="400" y="125" class="label">IngressClass</text>
+            
+            <rect x="270" y="145" width="170" height="15" class="ingress" rx="2"/>
+            <text x="355" y="152" class="small-label">NGINX • Traefik • HAProxy</text>
+            
+            <rect x="270" y="165" width="80" height="15" class="ingress" rx="2"/>
+            <text x="310" y="172" class="small-label">Host routing</text>
+            
+            <rect x="360" y="165" width="80" height="15" class="ingress" rx="2"/>
+            <text x="400" y="172" class="small-label">TLS/SSL</text>
+            
+            <!-- Services -->
+            <rect x="500" y="70" width="300" height="170" class="service" rx="8"/>
+            <text x="650" y="95" class="subtitle">Kubernetes Services</text>
+            
+            <rect x="520" y="115" width="80" height="20" class="service" rx="3"/>
+            <text x="560" y="125" class="label">ClusterIP</text>
+            
+            <rect x="610" y="115" width="80" height="20" class="service" rx="3"/>
+            <text x="650" y="125" class="label">NodePort</text>
+            
+            <rect x="700" y="115" width="80" height="20" class="service" rx="3"/>
+            <text x="740" y="125" class="label">LoadBalancer</text>
+            
+            <rect x="520" y="145" width="80" height="20" class="service" rx="3"/>
+            <text x="560" y="155" class="label">Headless</text>
+            
+            <rect x="610" y="145" width="80" height="20" class="service" rx="3"/>
+            <text x="650" y="155" class="label">ExternalName</text>
+            
+            <rect x="700" y="145" width="80" height="20" class="service" rx="3"/>
+            <text x="740" y="155" class="label">SessionAffinity</text>
+            
+            <rect x="520" y="175" width="100" height="15" class="service" rx="2"/>
+            <text x="570" y="182" class="small-label">10.96.0.0/12</text>
+            
+            <rect x="630" y="175" width="80" height="15" class="service" rx="2"/>
+            <text x="670" y="182" class="small-label">30000-32767</text>
+            
+            <rect x="720" y="175" width="60" height="15" class="service" rx="2"/>
+            <text x="750" y="182" class="small-label">External IP</text>
+            
+            <rect x="520" y="200" width="260" height="15" class="service" rx="2"/>
+            <text x="650" y="207" class="small-label">Selector: app=web → targetPort: 8080</text>
+            
+            <rect x="520" y="220" width="260" height="15" class="service" rx="2"/>
+            <text x="650" y="227" class="small-label">Load Balancing: Round-robin/Random</text>
+            
+            <!-- Endpoints -->
+            <rect x="850" y="70" width="180" height="120" class="endpoint" rx="8"/>
+            <text x="940" y="95" class="subtitle">Endpoints</text>
+            
+            <rect x="870" y="115" width="70" height="20" class="endpoint" rx="3"/>
+            <text x="905" y="125" class="label">Endpoints</text>
+            
+            <rect x="950" y="115" width="70" height="20" class="endpoint" rx="3"/>
+            <text x="985" y="125" class="label">EndpointSlice</text>
+            
+            <rect x="870" y="145" width="150" height="15" class="endpoint" rx="2"/>
+            <text x="945" y="152" class="small-label">Pod IPs: 10.244.1.5:8080</text>
+            
+            <rect x="870" y="165" width="150" height="15" class="endpoint" rx="2"/>
+            <text x="945" y="172" class="small-label">Ready: true, Serving: true</text>
+            
+            <!-- Pods -->
+            <rect x="1080" y="70" width="150" height="120" class="pod" rx="8"/>
+            <text x="1155" y="95" class="subtitle">Application Pods</text>
+            
+            <rect x="1100" y="115" width="110" height="20" class="pod" rx="3"/>
+            <text x="1155" y="125" class="label">web-pods</text>
+            
+            <rect x="1100" y="145" width="50" height="15" class="pod" rx="2"/>
+            <text x="1125" y="152" class="small-label">pod-1</text>
+            
+            <rect x="1160" y="145" width="50" height="15" class="pod" rx="2"/>
+            <text x="1185" y="152" class="small-label">pod-2</text>
+            
+            <rect x="1100" y="165" width="110" height="15" class="pod" rx="2"/>
+            <text x="1155" y="172" class="small-label">Labels: app=web</text>
+            
+            <!-- DNS -->
+            <rect x="50" y="200" width="200" height="120" class="dns" rx="8"/>
+            <text x="150" y="225" class="subtitle">DNS (CoreDNS)</text>
+            
+            <rect x="70" y="250" width="160" height="20" class="dns" rx="3"/>
+            <text x="150" y="260" class="label">Service Discovery</text>
+            
+            <rect x="70" y="280" width="160" height="15" class="dns" rx="2"/>
+            <text x="150" y="287" class="small-label">web.default.svc.cluster.local</text>
+            
+            <rect x="70" y="300" width="160" height="15" class="dns" rx="2"/>
+            <text x="150" y="307" class="small-label">DNS Resolution & Caching</text>
+            
+            <!-- CNI -->
+            <rect x="300" y="200" width="200" height="120" class="cni" rx="8"/>
+            <text x="400" y="225" class="subtitle">CNI Plugins</text>
+            
+            <rect x="320" y="250" width="70" height="20" class="cni" rx="3"/>
+            <text x="355" y="260" class="label">Calico</text>
+            
+            <rect x="400" y="250" width="70" height="20" class="cni" rx="3"/>
+            <text x="435" y="260" class="label">Cilium</text>
+            
+            <rect x="320" y="280" width="70" height="15" class="cni" rx="2"/>
+            <text x="355" y="287" class="small-label">Flannel</text>
+            
+            <rect x="400" y="280" width="70" height="15" class="cni" rx="2"/>
+            <text x="435" y="287" class="small-label">Weave</text>
+            
+            <rect x="320" y="300" width="150" height="15" class="cni" rx="2"/>
+            <text x="395" y="307" class="small-label">Pod Network: 10.244.0.0/16</text>
+            
+            <!-- kube-proxy -->
+            <rect x="550" y="200" width="200" height="120" class="proxy" rx="8"/>
+            <text x="650" y="225" class="subtitle">kube-proxy</text>
+            
+            <rect x="570" y="250" width="80" height="20" class="proxy" rx="3"/>
+            <text x="610" y="260" class="label">iptables</text>
+            
+            <rect x="660" y="250" width="80" height="20" class="proxy" rx="3"/>
+            <text x="700" y="260" class="label">IPVS</text>
+            
+            <rect x="570" y="280" width="170" height="15" class="proxy" rx="2"/>
+            <text x="655" y="287" class="small-label">Load Balancing Rules</text>
+            
+            <rect x="570" y="300" width="170" height="15" class="proxy" rx="2"/>
+            <text x="655" y="307" class="small-label">Service Implementation</text>
+            
+            <!-- Network Policies -->
+            <rect x="800" y="200" width="200" height="120" class="policy" rx="8"/>
+            <text x="900" y="225" class="subtitle">Network Policies</text>
+            
+            <rect x="820" y="250" width="80" height="20" class="policy" rx="3"/>
+            <text x="860" y="260" class="label">Ingress Rules</text>
+            
+            <rect x="910" y="250" width="80" height="20" class="policy" rx="3"/>
+            <text x="950" y="260" class="label">Egress Rules</text>
+            
+            <rect x="820" y="280" width="170" height="15" class="policy" rx="2"/>
+            <text x="905" y="287" class="small-label">podSelector & namespaceSelector</text>
+            
+            <rect x="820" y="300" width="170" height="15" class="policy" rx="2"/>
+            <text x="905" y="307" class="small-label">Micro-segmentation</text>
+            
+            <!-- Service Mesh -->
+            <rect x="1050" y="200" width="200" height="120" class="mesh" rx="8"/>
+            <text x="1150" y="225" class="subtitle">Service Mesh</text>
+            
+            <rect x="1070" y="250" width="70" height="20" class="mesh" rx="3"/>
+            <text x="1105" y="260" class="label">Istio</text>
+            
+            <rect x="1150" y="250" width="70" height="20" class="mesh" rx="3"/>
+            <text x="1185" y="260" class="label">Linkerd</text>
+            
+            <rect x="1070" y="280" width="150" height="15" class="mesh" rx="2"/>
+            <text x="1145" y="287" class="small-label">Envoy Sidecar Proxy</text>
+            
+            <rect x="1070" y="300" width="150" height="15" class="mesh" rx="2"/>
+            <text x="1145" y="307" class="small-label">mTLS • Observability</text>
+            
+            <!-- Network Flow -->
+            <rect x="200" y="370" width="1100" height="100" style="fill: #F0F9FF; stroke: #0369A1; stroke-width: 2;" rx="8"/>
+            <text x="750" y="395" style="font: bold 14px Arial; fill: #0369A1; text-anchor: middle;">Network Traffic Flow</text>
+            
+            <rect x="220" y="415" width="120" height="20" style="fill: #DBEAFE; stroke: #3B82F6; stroke-width: 1;" rx="3"/>
+            <text x="280" y="425" style="font: 8px Arial; fill: #1E40AF; text-anchor: middle;">1. External Request</text>
+            
+            <rect x="360" y="415" width="120" height="20" style="fill: #DBEAFE; stroke: #3B82F6; stroke-width: 1;" rx="3"/>
+            <text x="420" y="425" style="font: 8px Arial; fill: #1E40AF; text-anchor: middle;">2. Ingress Routing</text>
+            
+            <rect x="500" y="415" width="120" height="20" style="fill: #DBEAFE; stroke: #3B82F6; stroke-width: 1;" rx="3"/>
+            <text x="560" y="425" style="font: 8px Arial; fill: #1E40AF; text-anchor: middle;">3. Service Selection</text>
+            
+            <rect x="640" y="415" width="120" height="20" style="fill: #DBEAFE; stroke: #3B82F6; stroke-width: 1;" rx="3"/>
+            <text x="700" y="425" style="font: 8px Arial; fill: #1E40AF; text-anchor: middle;">4. Load Balancing</text>
+            
+            <rect x="780" y="415" width="120" height="20" style="fill: #DBEAFE; stroke: #3B82F6; stroke-width: 1;" rx="3"/>
+            <text x="840" y="425" style="font: 8px Arial; fill: #1E40AF; text-anchor: middle;">5. Pod Delivery</text>
+            
+            <rect x="920" y="415" width="120" height="20" style="fill: #DBEAFE; stroke: #3B82F6; stroke-width: 1;" rx="3"/>
+            <text x="980" y="425" style="font: 8px Arial; fill: #1E40AF; text-anchor: middle;">6. Network Policies</text>
+            
+            <rect x="1060" y="415" width="120" height="20" style="fill: #DBEAFE; stroke: #3B82F6; stroke-width: 1;" rx="3"/>
+            <text x="1120" y="425" style="font: 8px Arial; fill: #1E40AF; text-anchor: middle;">7. Application</text>
+            
+            <rect x="220" y="445" width="200" height="15" style="fill: #DBEAFE; stroke: #3B82F6; stroke-width: 1;" rx="2"/>
+            <text x="320" y="452" style="font: 7px Arial; fill: #1E40AF; text-anchor: middle;">DNS Resolution: web.default.svc.cluster.local</text>
+            
+            <rect x="440" y="445" width="200" height="15" style="fill: #DBEAFE; stroke: #3B82F6; stroke-width: 1;" rx="2"/>
+            <text x="540" y="452" style="font: 7px Arial; fill: #1E40AF; text-anchor: middle;">kube-proxy: iptables/IPVS rules</text>
+            
+            <rect x="660" y="445" width="200" height="15" style="fill: #DBEAFE; stroke: #3B82F6; stroke-width: 1;" rx="2"/>
+            <text x="760" y="452" style="font: 7px Arial; fill: #1E40AF; text-anchor: middle;">CNI: Pod network routing</text>
+            
+            <rect x="880" y="445" width="200" height="15" style="fill: #DBEAFE; stroke: #3B82F6; stroke-width: 1;" rx="2"/>
+            <text x="980" y="452" style="font: 7px Arial; fill: #1E40AF; text-anchor: middle;">Service Mesh: mTLS encryption</text>
+            
+            <!-- Connection Lines -->
+            
+            <!-- External to Ingress -->
+            <line x1="200" y1="120" x2="250" y2="120" class="routes"/>
+            
+            <!-- Ingress to Services -->
+            <line x1="450" y1="130" x2="500" y2="130" class="routes"/>
+            
+            <!-- Services to Endpoints -->
+            <line x1="800" y1="160" x2="850" y2="160" class="selects"/>
+            
+            <!-- Endpoints to Pods -->
+            <line x1="1030" y1="130" x2="1080" y2="130" class="selects"/>
+            
+            <!-- DNS resolves Services -->
+            <line x1="250" y1="260" x2="500" y2="180" class="resolves"/>
+            
+            <!-- CNI manages Pod networking -->
+            <line x1="400" y1="280" x2="1080" y2="155" class="manages"/>
+            
+            <!-- kube-proxy implements Services -->
+            <line x1="650" y1="280" x2="650" y2="240" class="proxies"/>
+            
+            <!-- Network Policies enforce rules -->
+            <line x1="900" y1="280" x2="1080" y2="155" class="enforces"/>
+            
+            <!-- Service Mesh manages communication -->
+            <line x1="1150" y1="280" x2="1155" y2="190" class="manages"/>
+            
+            <!-- Labels -->
+            <text x="225" y="115" style="font: 8px Arial; fill: #059669;">routes</text>
+            <text x="475" y="125" style="font: 8px Arial; fill: #059669;">routes</text>
+            <text x="825" y="155" style="font: 8px Arial; fill: #3B82F6;">selects</text>
+            <text x="1055" y="125" style="font: 8px Arial; fill: #3B82F6;">targets</text>
+            
+            <text x="375" y="220" style="font: 8px Arial; fill: #8B5CF6;">resolves</text>
+            <text x="740" y="225" style="font: 8px Arial; fill: #10B981;">manages</text>
+            <text x="675" y="260" style="font: 8px Arial; fill: #84CC16;">implements</text>
+            <text x="990" y="220" style="font: 8px Arial; fill: #EF4444;">enforces</text>
+            <text x="1150" y="240" style="font: 8px Arial; fill: #10B981;">manages</text>
+            
+            <!-- Flow arrows -->
+            <line x1="340" y1="425" x2="360" y2="425" class="routes"/>
+            <line x1="480" y1="425" x2="500" y2="425" class="routes"/>
+            <line x1="620" y1="425" x2="640" y2="425" class="routes"/>
+            <line x1="760" y1="425" x2="780" y2="425" class="routes"/>
+            <line x1="900" y1="425" x2="920" y2="425" class="routes"/>
+            <line x1="1040" y1="425" x2="1060" y2="425" class="routes"/>
+            
+        </svg>
+        
+        <div class="relationships">
+            <h3>🔗 Основные связи в Network Services</h3>
+            <ul>
+                <li><strong>External Traffic ──routes──> Ingress ──routes──> Service</strong> - Внешний трафик проходит через Ingress к сервисам</li>
+                <li><strong>Service ──selects──> Endpoints ──targets──> Pods</strong> - Сервис выбирает поды через endpoints</li>
+                <li><strong>CoreDNS ──resolves──> Service names</strong> - DNS разрешает имена сервисов в IP адреса</li>
+                <li><strong>kube-proxy ──implements──> Service load balancing</strong> - kube-proxy реализует балансировку нагрузки</li>
+                <li><strong>CNI ──manages──> Pod networking</strong> - CNI плагины управляют сетью подов</li>
+                <li><strong>NetworkPolicy ──enforces──> traffic rules</strong> - Сетевые политики применяют правила трафика</li>
+                <li><strong>Service Mesh ──manages──> service-to-service communication</strong> - Service mesh управляет межсервисным взаимодействием</li>
+                <li><strong>EndpointSlice ──tracks──> Pod health & readiness</strong> - EndpointSlice отслеживает состояние подов</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
